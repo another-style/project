@@ -50,9 +50,14 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
+    public function isActive(): bool
+    {
+        return $this->is_active;
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasPermissionTo('AdminPanel.access');
+        return $this->isActive() && $this->hasPermissionTo('AdminPanel.access');
     }
 
     /**

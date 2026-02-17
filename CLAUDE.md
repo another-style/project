@@ -8,7 +8,7 @@
 * Если ты не знаешь ответ на вопрос или не знаешь как решить задачу, то не придумывай ничего, скажи просто "Я не знаю".
 * Никогда не удаляй и не изменяй комментарии в PHP-коде, если того не требуется в рамках решения задачи.
   Запрещается удалять комментарии относительно тех мест кода, в которых не было изменений.
-* При ссылках на код в этом файле (CLAUDE.md) **никогда не указывай номера строк** — они устаревают при изменении кода. Вместо этого используй полное имя класса и метода в формате PHP: `\App\JsonApi\V1\Employees\Adapter::validateUniqueEmployee`. Если нужно сослаться на файл без конкретного метода, указывай только путь: `app/JsonApi/V1/Employees/Adapter.php`.
+* При ссылках на код в этом файле (CLAUDE.md) **никогда не указывай номера строк** — они устаревают при изменении кода. Вместо этого используй полное имя класса и метода в формате PHP: `\App\Models\User::isActive`. Если нужно сослаться на файл без конкретного метода, указывай только путь: `app/Models/User.php`.
 * Никогда не выполняй git-команды, которые изменяют состояние репозитория: `git add`, `git commit`, `git push`, `git merge`, `git rebase`, `git reset`, `git checkout`, `git stash`, `git branch -d` и т.д. Разрешены только команды для чтения: `git status`, `git log`, `git diff`, `git show`, `git branch` (без -d/-D).
 * Никогда не удаляй файл `todo.txt` в корне проекта.
 * Если в php-файлах есть неиспользуемые импорты классов через ключевое слово `use`, то удаляй их.
@@ -98,6 +98,7 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\User"
 - Для моделей из `App\Models` Laravel обнаруживает Policy автоматически (например, `UserPolicy` для `User`).
 - Для моделей spatie (`Spatie\Permission\Models\Role`, `Spatie\Permission\Models\Permission`) Policy регистрируются явно через `Gate::policy()` в `\App\Providers\AppServiceProvider::boot`.
 - **Существующие Policy**: `UserPolicy`, `RolePolicy`, `PermissionPolicy`.
+- **Проверка активности пользователя**: каждый метод Policy обязательно проверяет `$user->isActive()` перед проверкой permissions. Заблокированный пользователь (`is_active = false`) не может выполнять никакие действия, даже если у него есть соответствующие permissions. Метод `\App\Models\User::isActive` возвращает значение поля `is_active`. Аналогично, `\App\Models\User::canAccessPanel` также проверяет активность пользователя перед предоставлением доступа к админ-панели.
 - Каждый Policy содержит стандартный набор методов, которые Filament вызывает автоматически:
 
 | Метод Policy   | Действие Filament       | Permission          |
@@ -109,7 +110,7 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\User"
 | `delete`       | Удаление записи         | `Entity.delete`     |
 | `deleteAny`    | Массовое удаление       | `Entity.delete`     |
 
-- **При добавлении нового Filament-ресурса** необходимо: (1) создать permissions в миграции, (2) создать Policy-класс с методами из таблицы выше, (3) если модель не из `App\Models` — зарегистрировать Policy в `AppServiceProvider`.
+- **При добавлении нового Filament-ресурса** необходимо: (1) создать permissions в миграции, (2) создать Policy-класс с методами из таблицы выше (каждый метод должен проверять `$user->isActive()` перед проверкой permission), (3) если модель не из `App\Models` — зарегистрировать Policy в `AppServiceProvider`.
 
 ### Тестирование
 - PHPUnit с двумя наборами: `tests/Unit/` и `tests/Feature/`.
