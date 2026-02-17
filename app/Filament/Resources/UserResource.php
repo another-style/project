@@ -43,6 +43,9 @@ class UserResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label('Активен')
                     ->default(true),
+                Forms\Components\CheckboxList::make('roles')
+                    ->label('Роли')
+                    ->relationship('roles', 'name'),
             ]);
     }
 

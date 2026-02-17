@@ -83,6 +83,30 @@ npm run dev
 - Filament использует Livewire + Alpine.js, сосуществует с Inertia+Vue без конфликтов.
 - Ресурсы, страницы и виджеты размещаются в `app/Filament/`.
 
+### Роли и разрешения (spatie/laravel-permission)
+- Модель `User` использует трейт `HasRoles` и реализует интерфейс `FilamentUser`.
+- Доступ в админ-панель контролируется через permission `AdminPanel.access` в методе `\App\Models\User::canAccessPanel`.
+- **Формат permissions**: `Entity.action`, где `Entity` — название сущности (PascalCase), `action` — действие (lowercase). Примеры: `User.view`, `User.create`, `Role.update`, `Permission.delete`, `AdminPanel.access`.
+- При добавлении нового Filament-ресурса для сущности необходимо создать соответствующие permissions в отдельной миграции.
+
+### Авторизация действий (Policy)
+- Policy-классы расположены в `app/Policies/` и используются Filament для авторизации CRUD-действий над ресурсами.
+- Для моделей из `App\Models` Laravel обнаруживает Policy автоматически (например, `UserPolicy` для `User`).
+- Для моделей spatie (`Spatie\Permission\Models\Role`, `Spatie\Permission\Models\Permission`) Policy регистрируются явно через `Gate::policy()` в `\App\Providers\AppServiceProvider::boot`.
+- **Существующие Policy**: `UserPolicy`, `RolePolicy`, `PermissionPolicy`.
+- Каждый Policy содержит стандартный набор методов, которые Filament вызывает автоматически:
+
+| Метод Policy   | Действие Filament       | Permission          |
+|----------------|-------------------------|---------------------|
+| `viewAny`      | Список / навигация      | `Entity.view`       |
+| `view`         | Просмотр записи         | `Entity.view`       |
+| `create`       | Создание записи         | `Entity.create`     |
+| `update`       | Редактирование записи   | `Entity.update`     |
+| `delete`       | Удаление записи         | `Entity.delete`     |
+| `deleteAny`    | Массовое удаление       | `Entity.delete`     |
+
+- **При добавлении нового Filament-ресурса** необходимо: (1) создать permissions в миграции, (2) создать Policy-класс с методами из таблицы выше, (3) если модель не из `App\Models` — зарегистрировать Policy в `AppServiceProvider`.
+
 ### Тестирование
 - PHPUnit с двумя наборами: `tests/Unit/` и `tests/Feature/`.
 - Тесты используют базу данных SQLite `:memory:` (настроено в `phpunit.xml`).
