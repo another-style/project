@@ -128,3 +128,34 @@ docker compose exec -u root php chown -R $(id -u):$(id -g) .
 ```bash
 docker compose exec php php artisan migrate
 ```
+
+## Установка MCP сервера
+
+Для подключения Claude Code к тестовой СУБД используется MCP сервер MySQL.
+
+Вендор: https://github.com/benborla/mcp-server-mysql
+
+### 1. Установить Node.js (если не установлен)
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+### 2. Установить MCP сервер
+
+```bash
+npm install -g @benborla29/mcp-server-mysql
+```
+
+### 3. Подключить MCP сервер к Claude Code
+
+```bash
+claude mcp add mcp_server_mysql \
+  -e MYSQL_HOST="localhost" \
+  -e MYSQL_PORT="3308" \
+  -e MYSQL_USER="project" \
+  -e MYSQL_PASS="secret" \
+  -e MYSQL_DB="project" \
+  -- npx @benborla29/mcp-server-mysql
+```
