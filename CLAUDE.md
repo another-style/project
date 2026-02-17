@@ -61,6 +61,10 @@ npm run build
 
 # Vite dev-сервер
 npm run dev
+
+# Генерация PHPDoc для моделей (barryvdh/laravel-ide-helper)
+# Флаг -W перезаписывает PHPDoc прямо в файле модели
+docker compose exec php php artisan ide-helper:models -W "\App\Models\User"
 ```
 
 ## Архитектура
