@@ -22,3 +22,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Файл для Claude, в котором пишем таск
+/todo.txt
