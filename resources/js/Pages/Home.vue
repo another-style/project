@@ -48,12 +48,14 @@ const formatDate = (dateString) => {
                         <time>{{ formatDate(topic.created_at) }}</time>
                     </div>
                     <p class="mt-2 text-sm text-gray-800 line-clamp-3">{{ topic.message }}</p>
-                    <div
+                    <Link
                         v-if="topic.last_comment_at && topic.last_comment_at !== topic.created_at"
-                        class="mt-1 text-xs text-gray-400"
+                        :href="route('comments.show', topic.id) + '#comment-' + topic.last_comment_id"
+                        class="mt-1 block text-xs text-indigo-500 hover:text-indigo-700"
+                        @click.stop
                     >
                         Последний ответ: {{ formatDate(topic.last_comment_at) }}
-                    </div>
+                    </Link>
                 </Link>
             </div>
 

@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted, nextTick } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import CommentItem from '@/Components/CommentItem.vue';
 import CommentTree from '@/Components/CommentTree.vue';
@@ -6,6 +7,18 @@ import CommentTree from '@/Components/CommentTree.vue';
 defineProps({
     comment: Object,
     children: Array,
+});
+
+onMounted(() => {
+    const hash = window.location.hash;
+    if (hash) {
+        nextTick(() => {
+            const el = document.querySelector(hash);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
 });
 </script>
 

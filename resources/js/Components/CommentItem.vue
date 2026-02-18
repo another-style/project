@@ -29,7 +29,7 @@ const formatDate = (dateString) => {
 </script>
 
 <template>
-    <div class="rounded-lg border border-gray-200 bg-white p-4">
+    <div :id="'comment-' + comment.id" class="rounded-lg border border-gray-200 bg-white p-4">
         <div class="flex items-center justify-between text-sm text-gray-500">
             <span class="font-medium text-gray-900">
                 {{ comment.name || 'Аноним' }}

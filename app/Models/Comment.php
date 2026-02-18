@@ -17,6 +17,7 @@ class Comment extends Model
         'ip_address',
         'parent_id',
         'last_comment_at',
+        'last_comment_id',
     ];
 
     protected function casts(): array
@@ -30,13 +31,19 @@ class Comment extends Model
     {
         static::created(function (Comment $comment) {
             if ($comment->parent_id === null) {
-                // Новая тема — last_comment_at = created_at
-                $comment->updateQuietly(['last_comment_at' => $comment->created_at]);
+                // Новая тема — last_comment_at = created_at, last_comment_id = собственный id
+                $comment->updateQuietly([
+                    'last_comment_at' => $comment->created_at,
+                    'last_comment_id' => $comment->id,
+                ]);
             } else {
-                // Ответ — обновить last_comment_at у корневого комментария
+                // Ответ — обновить last_comment_at и last_comment_id у корневого комментария
                 $root = $comment->ancestors()->whereNull('parent_id')->first();
                 if ($root) {
-                    $root->updateQuietly(['last_comment_at' => now()]);
+                    $root->updateQuietly([
+                        'last_comment_at' => now(),
+                        'last_comment_id' => $comment->id,
+                    ]);
                 }
             }
         });
