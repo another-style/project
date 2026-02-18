@@ -6,7 +6,10 @@ import CommentTree from '@/Components/CommentTree.vue';
 
 defineProps({
     comment: Object,
-    children: Array,
+    children: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 onMounted(() => {

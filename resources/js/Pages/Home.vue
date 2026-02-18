@@ -60,18 +60,23 @@ const formatDate = (dateString) => {
             </div>
 
             <div v-if="topics.last_page > 1" class="mt-6 flex justify-center gap-2">
-                <Link
-                    v-for="link in topics.links"
-                    :key="link.label"
-                    :href="link.url"
-                    v-html="link.label"
-                    class="rounded-md px-3 py-2 text-sm"
-                    :class="{
-                        'bg-indigo-600 text-white': link.active,
-                        'bg-white text-gray-700 hover:bg-gray-50': !link.active && link.url,
-                        'text-gray-400 cursor-default': !link.url,
-                    }"
-                />
+                <template v-for="link in topics.links" :key="link.label">
+                    <Link
+                        v-if="link.url"
+                        :href="link.url"
+                        v-html="link.label"
+                        class="rounded-md px-3 py-2 text-sm"
+                        :class="{
+                            'bg-indigo-600 text-white': link.active,
+                            'bg-white text-gray-700 hover:bg-gray-50': !link.active,
+                        }"
+                    />
+                    <span
+                        v-else
+                        v-html="link.label"
+                        class="rounded-md px-3 py-2 text-sm text-gray-400 cursor-default"
+                    />
+                </template>
             </div>
         </div>
     </div>
