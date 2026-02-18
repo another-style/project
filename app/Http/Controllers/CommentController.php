@@ -17,7 +17,7 @@ class CommentController extends Controller
     public function index(): Response
     {
         $topics = Comment::roots()
-            ->orderByDesc('created_at')
+            ->orderByDesc('last_comment_at')
             ->paginate(20);
 
         return Inertia::render('Home', [

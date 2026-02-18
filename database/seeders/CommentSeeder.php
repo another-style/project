@@ -50,6 +50,10 @@ class CommentSeeder extends Seeder
                 $child->appendToNode($parent)->save();
                 $allNodes[] = $child;
             }
+
+            // Обновить last_comment_at у корневого комментария
+            $lastReplyDate = $currentDate->copy();
+            $root->update(['last_comment_at' => count($topic['replies']) > 0 ? $lastReplyDate : $threadDate]);
         }
     }
 
