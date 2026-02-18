@@ -6,7 +6,7 @@ import path from 'path';
 export default defineConfig({
     resolve: {
         alias: {
-            'ziggy-js': path.resolve(__dirname, 'vendor/tightenco/ziggy'),
+            'ziggy-js': path.resolve(__dirname, 'vendor/tightenco/ziggy/dist/index.esm.js'),
         },
     },
     plugins: [
