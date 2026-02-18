@@ -1,6 +1,7 @@
 FROM php:8.2-fpm
 
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's|http://deb.debian.org|http://mirror.yandex.ru|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
