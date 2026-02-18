@@ -1,18 +1,13 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [CommentController::class, 'index'])->name('home');
+Route::get('/comments/{comment}', [CommentController::class, 'show'])->name('comments.show');
+Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::get('/comments/{comment}/replies', [CommentController::class, 'loadMore'])->name('comments.replies');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
