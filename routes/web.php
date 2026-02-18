@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', [CommentController::class, 'index'])->name('home');
 Route::get('/comments/{comment}', [CommentController::class, 'show'])->name('comments.show');
