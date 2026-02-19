@@ -73,7 +73,7 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\User"
 - **Маршруты**: `routes/web.php` (Inertia-страницы), `routes/auth.php` (маршруты аутентификации Breeze). Filament автоматически регистрирует свои маршруты под `/admin`.
 - **Контроллеры**: `app/Http/Controllers/` — стандартные контроллеры возвращают ответы через `Inertia::render()`.
 - **Middleware**: `HandleInertiaRequests` передаёт `auth.user` prop на все Inertia-страницы.
-- **Модели**: `app/Models/` — Eloquent-модели с трейтами spatie permission.
+- **Модели**: `app/Models/` — Eloquent-модели с трейтами spatie permission. Модель `Comment` использует `kalnoy/nestedset` (`NodeTrait`) для иерархической структуры комментариев и `SoftDeletes`.
 
 ### Фронтенд (Vue 3 + Inertia)
 - **Точка входа**: `resources/js/app.js`
@@ -86,6 +86,7 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\User"
 ### Админ-панель (Filament)
 - Filament использует Livewire + Alpine.js, сосуществует с Inertia+Vue без конфликтов.
 - Ресурсы, страницы и виджеты размещаются в `app/Filament/`.
+- **Существующие ресурсы**: `UserResource`, `RoleResource`, `PermissionResource` (группа навигации «Доступ»), `CommentResource` (модерация комментариев с поддержкой soft delete).
 
 ### Роли и разрешения (spatie/laravel-permission)
 - Модель `User` использует трейт `HasRoles` и реализует интерфейс `FilamentUser`.
@@ -97,7 +98,7 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\User"
 - Policy-классы расположены в `app/Policies/` и используются Filament для авторизации CRUD-действий над ресурсами.
 - Для моделей из `App\Models` Laravel обнаруживает Policy автоматически (например, `UserPolicy` для `User`).
 - Для моделей spatie (`Spatie\Permission\Models\Role`, `Spatie\Permission\Models\Permission`) Policy регистрируются явно через `Gate::policy()` в `\App\Providers\AppServiceProvider::boot`.
-- **Существующие Policy**: `UserPolicy`, `RolePolicy`, `PermissionPolicy`.
+- **Существующие Policy**: `UserPolicy`, `CommentPolicy`, `RolePolicy`, `PermissionPolicy`.
 - **Проверка активности пользователя**: каждый метод Policy обязательно проверяет `$user->isActive()` перед проверкой permissions. Заблокированный пользователь (`is_active = false`) не может выполнять никакие действия, даже если у него есть соответствующие permissions. Метод `\App\Models\User::isActive` возвращает значение поля `is_active`. Аналогично, `\App\Models\User::canAccessPanel` также проверяет активность пользователя перед предоставлением доступа к админ-панели.
 - Каждый Policy содержит стандартный набор методов, которые Filament вызывает автоматически:
 
