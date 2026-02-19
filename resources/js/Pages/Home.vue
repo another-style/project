@@ -70,6 +70,8 @@ const formatDate = (dateString) => {
                 Стек: Laravel 12, Vue 3, Inertia.js, Filament 3, Tailwind CSS, MySQL, Docker.
                 Исходный код:
                 <a href="https://github.com/another-style/project" target="_blank" class="text-indigo-600 hover:text-indigo-500 underline">GitHub</a>.
+                Обсуждение:
+                <a href="https://another-it.ru/2026/02/18/llm-cant-write-working-code/" target="_blank" class="text-indigo-600 hover:text-indigo-500 underline">тут</a>.
             </p>
 
             <div class="mt-6 rounded-lg bg-white p-6 shadow-sm">
