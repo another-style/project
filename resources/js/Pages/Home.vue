@@ -60,11 +60,11 @@ const formatDate = (dateString) => {
 </script>
 
 <template>
-    <Head title="Дискус" />
+    <Head title="Пример LLM-генерации" />
 
     <div class="min-h-screen bg-gray-100">
         <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-            <h1 class="text-2xl font-bold text-gray-900">Дискус</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Пример LLM-генерации</h1>
             <p class="mt-2 text-sm text-gray-600">
                 Данный мини-сайт в качестве <u>эксперимента</u> был полностью написан системой Claude Code за утро и вечер одного дня. Человек не написал тут ни одной строчки кода, не выполнил ни одной bash-команды.
                 Стек: Laravel 12, Vue 3, Inertia.js, Filament 3, Tailwind CSS, MySQL, Docker.
