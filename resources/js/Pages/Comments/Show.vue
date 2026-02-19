@@ -48,7 +48,7 @@ onMounted(() => {
 
             <CommentItem :comment="comment" />
 
-            <div v-if="children.length > 0" class="mt-4 ml-6 border-l-2 border-gray-200 pl-4">
+            <div v-if="children.length > 0" class="mt-4 ml-2 border-l-2 border-gray-200 pl-2 sm:ml-6 sm:pl-4">
                 <CommentTree :comments="children" />
             </div>
 

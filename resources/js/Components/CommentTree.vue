@@ -43,7 +43,7 @@ const loadMore = async (commentId) => {
         <div v-for="comment in comments" :key="comment.id">
             <CommentItem :comment="comment" />
 
-            <div v-if="comment.children && comment.children.length > 0" class="ml-6 mt-2 border-l-2 border-gray-200 pl-4">
+            <div v-if="comment.children && comment.children.length > 0" class="ml-2 mt-2 border-l-2 border-gray-200 pl-2 sm:ml-6 sm:pl-4">
                 <CommentTree
                     :comments="comment.children"
                     :depth="depth + 1"
@@ -52,7 +52,7 @@ const loadMore = async (commentId) => {
                 />
             </div>
 
-            <div v-if="comment.has_more_replies && !loadedReplies[comment.id]" class="ml-6 mt-2">
+            <div v-if="comment.has_more_replies && !loadedReplies[comment.id]" class="ml-2 mt-2 sm:ml-6">
                 <Link
                     v-if="depth >= inlineLoadMaxDepth"
                     :href="route('comments.show', comment.id)"
@@ -70,7 +70,7 @@ const loadMore = async (commentId) => {
                 </button>
             </div>
 
-            <div v-if="loadedReplies[comment.id]" class="ml-6 mt-2 border-l-2 border-gray-200 pl-4">
+            <div v-if="loadedReplies[comment.id]" class="ml-2 mt-2 border-l-2 border-gray-200 pl-2 sm:ml-6 sm:pl-4">
                 <CommentTree
                     :comments="loadedReplies[comment.id]"
                     :depth="depth + 1"
