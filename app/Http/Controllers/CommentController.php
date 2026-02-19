@@ -11,6 +11,8 @@ use Inertia\Response;
 
 class CommentController extends Controller
 {
+    private const MAX_DEPTH = 10;
+
     /**
      * Главная страница — список корневых комментариев (тем).
      */
@@ -19,6 +21,32 @@ class CommentController extends Controller
         $topics = Comment::roots()
             ->orderByDesc('last_comment_at')
             ->paginate(20);
+
+        $lastCommentIds = $topics->getCollection()
+            ->filter(fn ($t) => $t->last_comment_id && $t->last_comment_id !== $t->id)
+            ->pluck('last_comment_id')
+            ->unique()
+            ->values();
+
+        $lastComments = collect();
+        if ($lastCommentIds->isNotEmpty()) {
+            $lastComments = Comment::withDepth()
+                ->whereIn('id', $lastCommentIds)
+                ->get()
+                ->keyBy('id');
+        }
+
+        $topics->getCollection()->transform(function ($topic) use ($lastComments) {
+            $topic->last_comment_link = null;
+            if ($topic->last_comment_id && $lastComments->has($topic->last_comment_id)) {
+                $lastComment = $lastComments->get($topic->last_comment_id);
+                if ($lastComment->depth > self::MAX_DEPTH) {
+                    $topic->last_comment_link = route('comments.show', $lastComment->parent_id);
+                }
+            }
+
+            return $topic;
+        });
 
         return Inertia::render('Home', [
             'topics' => $topics,
@@ -34,7 +62,7 @@ class CommentController extends Controller
             ->defaultOrder()
             ->get();
 
-        $tree = $this->buildTreeFromCollection($comment, $descendants, 10);
+        $tree = $this->buildTreeFromCollection($comment, $descendants, self::MAX_DEPTH);
 
         return Inertia::render('Comments/Show', [
             'comment' => $comment->only(['id', 'name', 'message', 'created_at', 'parent_id']),

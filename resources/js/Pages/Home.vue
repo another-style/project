@@ -50,7 +50,7 @@ const formatDate = (dateString) => {
                     <p class="mt-2 text-sm text-gray-800 line-clamp-3">{{ topic.message }}</p>
                     <Link
                         v-if="topic.last_comment_at && topic.last_comment_at !== topic.created_at"
-                        :href="route('comments.show', topic.id) + '#comment-' + topic.last_comment_id"
+                        :href="topic.last_comment_link || (route('comments.show', topic.id) + '#comment-' + topic.last_comment_id)"
                         class="mt-1 block text-xs text-indigo-500 hover:text-indigo-700"
                         @click.stop
                     >
