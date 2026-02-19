@@ -30,7 +30,7 @@ onMounted(() => {
 
     <div class="min-h-screen bg-gray-100">
         <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-            <div class="mb-6">
+            <div class="mb-6 flex items-center gap-4">
                 <Link
                     v-if="comment.parent_id"
                     :href="route('comments.show', comment.parent_id)"
@@ -39,11 +39,10 @@ onMounted(() => {
                     &larr; К родительскому комментарию
                 </Link>
                 <Link
-                    v-else
                     :href="route('home')"
                     class="text-sm text-indigo-600 hover:text-indigo-800"
                 >
-                    &larr; К списку тем
+                    &larr; На главную
                 </Link>
             </div>
 
