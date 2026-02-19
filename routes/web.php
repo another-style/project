@@ -9,6 +9,7 @@ Route::get('/', [CommentController::class, 'index'])->name('home');
 Route::get('/comments/{comment}', [CommentController::class, 'show'])->name('comments.show');
 Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
 Route::get('/comments/{comment}/replies', [CommentController::class, 'loadMore'])->name('comments.replies');
+Route::post('/comments/{comment}/vote', [CommentController::class, 'vote'])->name('comments.vote');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

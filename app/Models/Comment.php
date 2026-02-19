@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Kalnoy\Nestedset\NodeTrait;
 
@@ -18,6 +19,8 @@ class Comment extends Model
         'parent_id',
         'last_comment_at',
         'last_comment_id',
+        'likes_count',
+        'dislikes_count',
     ];
 
     protected function casts(): array
@@ -47,6 +50,11 @@ class Comment extends Model
                 }
             }
         });
+    }
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(CommentVote::class);
     }
 
     /**
