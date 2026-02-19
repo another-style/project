@@ -40,6 +40,17 @@ class CommentResource extends Resource
                 Forms\Components\TextInput::make('parent_id')
                     ->label('ID родителя')
                     ->disabled(),
+                Forms\Components\Select::make('tags')
+                    ->label('Теги')
+                    ->relationship('tags', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Название')
+                            ->required()
+                            ->maxLength(50),
+                    ]),
             ]);
     }
 
@@ -64,6 +75,9 @@ class CommentResource extends Resource
                     ->label('Родитель')
                     ->default('Тема')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('tags.name')
+                    ->label('Теги')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Дата создания')
                     ->dateTime()

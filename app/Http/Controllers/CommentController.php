@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\CommentVote;
+use App\Models\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,9 +21,20 @@ class CommentController extends Controller
      */
     public function index(Request $request): Response
     {
-        $topics = Comment::roots()
-            ->orderByDesc('last_comment_at')
-            ->paginate(20);
+        $query = Comment::roots()
+            ->with('tags');
+
+        // Фильтрация по тегу
+        $currentTag = $request->query('tag');
+        if ($currentTag) {
+            $query->whereHas('tags', function ($q) use ($currentTag) {
+                $q->where('name', $currentTag);
+            });
+        }
+
+        $topics = $query->orderByDesc('last_comment_at')
+            ->paginate(20)
+            ->withQueryString();
 
         $lastCommentIds = $topics->getCollection()
             ->filter(fn ($t) => $t->last_comment_id && $t->last_comment_id !== $t->id)
@@ -54,8 +66,24 @@ class CommentController extends Controller
             return $topic;
         });
 
+        // Все теги с количеством тем
+        $allTags = Tag::whereHas('comments', function ($q) {
+            $q->whereNull('parent_id');
+        })
+            ->withCount(['comments' => function ($q) {
+                $q->whereNull('parent_id');
+            }])
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($tag) => [
+                'name' => $tag->name,
+                'count' => $tag->comments_count,
+            ]);
+
         return Inertia::render('Home', [
             'topics' => $topics,
+            'allTags' => $allTags,
+            'currentTag' => $currentTag,
         ]);
     }
 
@@ -96,6 +124,8 @@ class CommentController extends Controller
             'name' => ['nullable', 'string', 'max:50'],
             'message' => ['required', 'string', 'max:5000'],
             'parent_id' => ['nullable', 'integer', 'exists:comments,id'],
+            'tags' => ['nullable', 'array', 'max:5'],
+            'tags.*' => ['string', 'max:50'],
         ]);
 
         $comment = Comment::create([
@@ -104,6 +134,13 @@ class CommentController extends Controller
             'ip_address' => $request->ip(),
             'parent_id' => $validated['parent_id'] ?? null,
         ]);
+
+        // Теги добавляются только для корневых комментариев (тем)
+        if ($comment->parent_id === null && ! empty($validated['tags'])) {
+            $tagIds = collect($validated['tags'])
+                ->map(fn ($name) => Tag::firstOrCreate(['name' => trim($name)])->id);
+            $comment->tags()->sync($tagIds);
+        }
 
         if ($comment->parent_id) {
             return redirect()->route('comments.show', $comment->parent_id)

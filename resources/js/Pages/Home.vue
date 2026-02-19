@@ -5,6 +5,14 @@ import CommentForm from '@/Components/CommentForm.vue';
 
 const props = defineProps({
     topics: Object,
+    allTags: {
+        type: Array,
+        default: () => [],
+    },
+    currentTag: {
+        type: String,
+        default: null,
+    },
 });
 
 const votesData = ref({});
@@ -60,7 +68,33 @@ const formatDate = (dateString) => {
 
             <div class="mt-6 rounded-lg bg-white p-6 shadow-sm">
                 <h2 class="mb-4 text-lg font-medium text-gray-900">Создать новую тему</h2>
-                <CommentForm placeholder="О чём хотите поговорить?" />
+                <CommentForm placeholder="О чём хотите поговорить?" :show-tags="true" />
+            </div>
+
+            <!-- Облако тегов -->
+            <div v-if="allTags.length > 0" class="mt-4 rounded-lg bg-white p-4 shadow-sm">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-medium text-gray-700">Теги:</span>
+                    <Link
+                        v-if="currentTag"
+                        href="/"
+                        class="inline-flex items-center rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-700 hover:bg-gray-300"
+                    >
+                        Сбросить фильтр &times;
+                    </Link>
+                    <Link
+                        v-for="tag in allTags"
+                        :key="tag.name"
+                        :href="'/?tag=' + encodeURIComponent(tag.name)"
+                        class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
+                        :class="currentTag === tag.name
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200'"
+                    >
+                        {{ tag.name }}
+                        <span class="opacity-60">{{ tag.count }}</span>
+                    </Link>
+                </div>
             </div>
 
             <div class="mt-8 space-y-4">
@@ -81,6 +115,18 @@ const formatDate = (dateString) => {
                         <time>{{ formatDate(topic.created_at) }}</time>
                     </div>
                     <p class="mt-2 text-sm text-gray-800 line-clamp-3">{{ topic.message }}</p>
+                    <!-- Теги темы -->
+                    <div v-if="topic.tags && topic.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
+                        <Link
+                            v-for="tag in topic.tags"
+                            :key="tag.id"
+                            :href="'/?tag=' + encodeURIComponent(tag.name)"
+                            class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 hover:bg-indigo-200"
+                            @click.stop
+                        >
+                            {{ tag.name }}
+                        </Link>
+                    </div>
                     <div class="mt-2 flex items-center gap-4" @click.stop>
                         <button
                             @click.prevent="sendVote(topic.id, 1)"
