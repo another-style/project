@@ -41,7 +41,9 @@ class CommentResource extends Resource
                     ->label('ID родителя')
                     ->disabled(),
                 Forms\Components\Toggle::make('is_pinned')
-                    ->label('Закреплён'),
+                    ->label('Закреплён')
+                    ->visible(fn (): bool => auth()->user()->can('pin', new Comment()))
+                    ->disabled(fn (): bool => ! auth()->user()->can('pin', new Comment())),
                 Forms\Components\Select::make('tags')
                     ->label('Теги')
                     ->relationship('tags', 'name')
@@ -104,7 +106,7 @@ class CommentResource extends Resource
                     ->action(function (Comment $record): void {
                         $record->update(['is_pinned' => ! $record->is_pinned]);
                     })
-                    ->visible(fn (Comment $record): bool => auth()->user()->can('pin', $record)),
+                    ->authorize('pin'),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
