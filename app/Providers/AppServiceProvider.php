@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
@@ -29,5 +31,13 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
+
+        RateLimiter::for('comment-store', function ($request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('comment-vote', function ($request) {
+            return Limit::perMinute(30)->by($request->ip());
+        });
     }
 }
