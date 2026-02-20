@@ -16,6 +16,9 @@ class MarkdownService
         $environment = new Environment([
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
+            'renderer' => [
+                'soft_break' => '<br>',
+            ],
         ]);
 
         $environment->addExtension(new CommonMarkCoreExtension());
