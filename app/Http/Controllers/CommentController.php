@@ -106,6 +106,7 @@ class CommentController extends Controller
             'comment' => array_merge(
                 $comment->only(['id', 'name', 'message', 'created_at', 'parent_id']),
                 [
+                    'message_html' => $comment->message_html,
                     'likes_count' => $comment->likes_count,
                     'dislikes_count' => $comment->dislikes_count,
                     'user_vote' => $userVotes->get($comment->id),
@@ -249,6 +250,7 @@ class CommentController extends Controller
                         'id' => $child->id,
                         'name' => $child->name,
                         'message' => $child->message,
+                        'message_html' => $child->message_html,
                         'created_at' => $child->created_at,
                         'parent_id' => $child->parent_id,
                         'likes_count' => $child->likes_count,
@@ -265,6 +267,7 @@ class CommentController extends Controller
                     'id' => $child->id,
                     'name' => $child->name,
                     'message' => $child->message,
+                    'message_html' => $child->message_html,
                     'created_at' => $child->created_at,
                     'parent_id' => $child->parent_id,
                     'likes_count' => $child->likes_count,

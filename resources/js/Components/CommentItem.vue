@@ -11,13 +11,37 @@ const props = defineProps({
 });
 
 const showReplyForm = ref(false);
+const initialMessage = ref('');
 const likesCount = ref(props.comment.likes_count ?? 0);
 const dislikesCount = ref(props.comment.dislikes_count ?? 0);
 const userVote = ref(props.comment.user_vote ?? null);
 const voting = ref(false);
+const messageEl = ref(null);
 
 const toggleReplyForm = () => {
-    showReplyForm.value = !showReplyForm.value;
+    if (showReplyForm.value) {
+        showReplyForm.value = false;
+        initialMessage.value = '';
+        return;
+    }
+
+    // Проверяем выделенный текст внутри блока сообщения
+    let quotedText = '';
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim() && messageEl.value) {
+        if (messageEl.value.contains(selection.anchorNode)) {
+            quotedText = selection.toString().trim();
+        }
+    }
+
+    if (quotedText) {
+        const quoted = quotedText.split('\n').map(line => '> ' + line).join('\n');
+        initialMessage.value = quoted + '\n\n';
+    } else {
+        initialMessage.value = '';
+    }
+
+    showReplyForm.value = true;
 };
 
 const sendVote = async (voteValue) => {
@@ -75,7 +99,7 @@ const formatDate = (dateString) => {
             </div>
         </div>
 
-        <div class="mt-2 whitespace-pre-wrap text-sm text-gray-800">{{ comment.message }}</div>
+        <div ref="messageEl" class="markdown-content mt-2 text-sm text-gray-800" v-html="comment.message_html"></div>
 
         <div class="mt-3 flex items-center gap-4">
             <button
@@ -108,11 +132,14 @@ const formatDate = (dateString) => {
             >
                 {{ showReplyForm ? 'Отмена' : 'Ответить' }}
             </button>
+
+            <span v-if="!showReplyForm" class="text-xs text-gray-400">Выделите текст и нажмите «Ответить», чтобы процитировать</span>
         </div>
 
         <div v-if="showReplyForm" class="mt-3">
             <CommentForm
                 :parent-id="comment.id"
+                :initial-message="initialMessage"
                 placeholder="Написать ответ..."
                 @submitted="showReplyForm = false"
             />

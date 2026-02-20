@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
+import { useMarkdownToolbar } from '@/Composables/useMarkdownToolbar.js';
 
 const props = defineProps({
     parentId: {
@@ -16,18 +17,35 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    initialMessage: {
+        type: String,
+        default: '',
+    },
 });
 
 const emit = defineEmits(['submitted']);
 
 const form = useForm({
     name: '',
-    message: '',
+    message: props.initialMessage,
     parent_id: props.parentId,
     tags: [],
 });
 
+const textareaRef = ref(null);
 const tagInput = ref('');
+const { applyMarkdown } = useMarkdownToolbar();
+
+watch(() => props.initialMessage, (val) => {
+    form.message = val;
+});
+
+const handleApplyMarkdown = (type) => {
+    applyMarkdown(textareaRef, {
+        get value() { return form.message; },
+        set value(v) { form.message = v; },
+    }, type);
+};
 
 const addTag = () => {
     const tag = tagInput.value.trim();
@@ -66,8 +84,36 @@ const submit = () => {
             <InputError :message="form.errors.name" class="mt-1" />
         </div>
 
+        <div class="flex flex-wrap gap-1 bg-gray-50 px-2 py-1.5">
+            <button type="button" @click="handleApplyMarkdown('bold')" class="markdown-toolbar-btn" title="Жирный">
+                <strong>Ж</strong>
+            </button>
+            <button type="button" @click="handleApplyMarkdown('italic')" class="markdown-toolbar-btn" title="Курсив">
+                <em>К</em>
+            </button>
+            <button type="button" @click="handleApplyMarkdown('strikethrough')" class="markdown-toolbar-btn" title="Зачёркнутый">
+                <del>S</del>
+            </button>
+            <button type="button" @click="handleApplyMarkdown('code')" class="markdown-toolbar-btn" title="Инлайн-код">
+                &lt;&gt;
+            </button>
+            <button type="button" @click="handleApplyMarkdown('codeBlock')" class="markdown-toolbar-btn" title="Блок кода">
+                ```
+            </button>
+            <button type="button" @click="handleApplyMarkdown('list')" class="markdown-toolbar-btn" title="Список">
+                •
+            </button>
+            <button type="button" @click="handleApplyMarkdown('orderedList')" class="markdown-toolbar-btn" title="Нумерованный список">
+                1.
+            </button>
+            <button type="button" @click="handleApplyMarkdown('quote')" class="markdown-toolbar-btn" title="Цитата">
+                &gt;
+            </button>
+        </div>
+
         <div>
             <textarea
+                ref="textareaRef"
                 v-model="form.message"
                 :placeholder="placeholder"
                 rows="4"
@@ -77,6 +123,8 @@ const submit = () => {
             ></textarea>
             <InputError :message="form.errors.message" class="mt-1" />
         </div>
+
+        <span class="text-xs text-gray-400">{{ form.message.length }} / 5000</span>
 
         <div v-if="showTags">
             <div v-if="form.tags.length > 0" class="mb-2 flex flex-wrap gap-1">
@@ -110,8 +158,7 @@ const submit = () => {
             <InputError :message="form.errors.tags" class="mt-1" />
         </div>
 
-        <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-400">{{ form.message.length }} / 5000</span>
+        <div class="flex justify-end">
             <button
                 type="submit"
                 :disabled="form.processing"

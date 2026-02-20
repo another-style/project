@@ -1,3 +1,53 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Markdown content styles */
+.markdown-content p {
+    @apply mb-2 last:mb-0;
+}
+
+.markdown-content strong {
+    @apply font-bold;
+}
+
+.markdown-content em {
+    @apply italic;
+}
+
+.markdown-content del {
+    @apply line-through;
+}
+
+.markdown-content code {
+    @apply rounded bg-gray-100 px-1 py-0.5 text-xs text-pink-600;
+}
+
+.markdown-content pre {
+    @apply mb-2 overflow-x-auto rounded bg-gray-100 p-3 last:mb-0;
+}
+
+.markdown-content pre code {
+    @apply bg-transparent p-0 text-gray-800;
+}
+
+.markdown-content blockquote {
+    @apply mb-2 border-l-4 border-gray-300 pl-3 italic text-gray-600 last:mb-0;
+}
+
+.markdown-content ul {
+    @apply mb-2 list-disc pl-5 last:mb-0;
+}
+
+.markdown-content ol {
+    @apply mb-2 list-decimal pl-5 last:mb-0;
+}
+
+.markdown-content li {
+    @apply mb-1 last:mb-0;
+}
+
+/* Markdown toolbar button */
+.markdown-toolbar-btn {
+    @apply rounded px-2.5 py-1 text-sm text-gray-600 hover:bg-gray-200 hover:text-gray-900;
+}
