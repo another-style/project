@@ -32,7 +32,8 @@ class CommentController extends Controller
             });
         }
 
-        $topics = $query->orderByDesc('last_comment_at')
+        $topics = $query->orderByDesc('is_pinned')
+            ->orderByDesc('last_comment_at')
             ->paginate(20)
             ->withQueryString();
 

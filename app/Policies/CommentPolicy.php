@@ -36,4 +36,9 @@ class CommentPolicy
     {
         return $user->isActive() && $user->hasPermissionTo('Comment.delete');
     }
+
+    public function pin(User $user, Comment $comment): bool
+    {
+        return $user->isActive() && $user->hasPermissionTo('Comment.pin');
+    }
 }

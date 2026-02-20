@@ -40,6 +40,8 @@ class CommentResource extends Resource
                 Forms\Components\TextInput::make('parent_id')
                     ->label('ID родителя')
                     ->disabled(),
+                Forms\Components\Toggle::make('is_pinned')
+                    ->label('Закреплён'),
                 Forms\Components\Select::make('tags')
                     ->label('Теги')
                     ->relationship('tags', 'name')
@@ -78,6 +80,12 @@ class CommentResource extends Resource
                 Tables\Columns\TextColumn::make('tags.name')
                     ->label('Теги')
                     ->badge(),
+                Tables\Columns\IconColumn::make('is_pinned')
+                    ->label('Закреплён')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-bookmark')
+                    ->falseIcon('heroicon-o-bookmark-slash')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Дата создания')
                     ->dateTime()
@@ -86,8 +94,17 @@ class CommentResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TernaryFilter::make('is_pinned')
+                    ->label('Закреплённые'),
             ])
             ->actions([
+                Tables\Actions\Action::make('togglePin')
+                    ->label(fn (Comment $record): string => $record->is_pinned ? 'Открепить' : 'Закрепить')
+                    ->icon(fn (Comment $record): string => $record->is_pinned ? 'heroicon-o-bookmark-slash' : 'heroicon-o-bookmark')
+                    ->action(function (Comment $record): void {
+                        $record->update(['is_pinned' => ! $record->is_pinned]);
+                    })
+                    ->visible(fn (Comment $record): bool => auth()->user()->can('pin', $record)),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),

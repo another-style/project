@@ -24,12 +24,14 @@ class Comment extends Model
         'last_comment_id',
         'likes_count',
         'dislikes_count',
+        'is_pinned',
     ];
 
     protected function casts(): array
     {
         return [
             'last_comment_at' => 'datetime',
+            'is_pinned' => 'boolean',
         ];
     }
 
