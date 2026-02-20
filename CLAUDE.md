@@ -64,7 +64,9 @@ npm run dev
 
 # Генерация PHPDoc для моделей (barryvdh/laravel-ide-helper)
 # Флаг -W перезаписывает PHPDoc прямо в файле модели
-docker compose exec php php artisan ide-helper:models -W "\App\Models\User"
+# ВАЖНО: всегда запускай эту команду после изменения модели
+# (добавление/удаление полей, связей, аксессоров, скоупов и т.д.)
+docker compose exec php php artisan ide-helper:models -W "\App\Models\{Model}"
 ```
 
 ## Архитектура

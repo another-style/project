@@ -11,6 +11,95 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Kalnoy\Nestedset\NodeTrait;
 
+/**
+ * @property int $id
+ * @property int $_lft
+ * @property int $_rgt
+ * @property int|null $parent_id
+ * @property string|null $name
+ * @property string $message
+ * @property string $ip_address
+ * @property int $likes_count
+ * @property int $dislikes_count
+ * @property bool $is_pinned
+ * @property \Illuminate\Support\Carbon|null $last_comment_at
+ * @property int|null $last_comment_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Kalnoy\Nestedset\Collection<int, Comment> $children
+ * @property-read int|null $children_count
+ * @property-read mixed $message_html
+ * @property-read Comment|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read int|null $tags_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CommentVote> $votes
+ * @property-read int|null $votes_count
+ * @method static \Kalnoy\Nestedset\Collection<int, static> all($columns = ['*'])
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment ancestorsAndSelf($id, array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment ancestorsOf($id, array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment applyNestedSetScope(?string $table = null)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment countErrors()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment d()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment defaultOrder(string $dir = 'asc')
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment descendantsAndSelf($id, array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment descendantsOf($id, array $columns = [], $andSelf = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment fixSubtree($root)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment fixTree($root = null)
+ * @method static \Kalnoy\Nestedset\Collection<int, static> get($columns = ['*'])
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment getNodeData($id, $required = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment getPlainNodeData($id, $required = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment getTotalErrors()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment hasChildren()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment hasParent()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment isBroken()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment leaves(array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment makeGap(int $cut, int $height)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment moveNode($key, $position)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment newModelQuery()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Comment onlyTrashed()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment orWhereAncestorOf(bool $id, bool $andSelf = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment orWhereDescendantOf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment orWhereNodeBetween($values)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment orWhereNotDescendantOf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment query()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment rebuildSubtree($root, array $data, $delete = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment rebuildTree(array $data, $delete = false, $root = null)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment reversed()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment root(array $columns = [])
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment roots()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereAncestorOf($id, $andSelf = false, $boolean = 'and')
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereAncestorOrSelf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereCreatedAt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereDeletedAt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereDescendantOf($id, $boolean = 'and', $not = false, $andSelf = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereDescendantOrSelf(string $id, string $boolean = 'and', string $not = false)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereDislikesCount($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereId($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereIpAddress($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereIsAfter($id, $boolean = 'and')
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereIsBefore($id, $boolean = 'and')
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereIsLeaf()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereIsPinned($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereIsRoot()
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereLastCommentAt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereLastCommentId($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereLft($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereLikesCount($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereMessage($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereName($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereNodeBetween($values, $boolean = 'and', $not = false, $query = null)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereNotDescendantOf($id)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereParentId($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereRgt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment whereUpdatedAt($value)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment withDepth(string $as = 'depth')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Comment withTrashed(bool $withTrashed = true)
+ * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Comment withoutRoot()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Comment withoutTrashed()
+ * @mixin \Eloquent
+ */
 class Comment extends Model
 {
     use HasFactory, NodeTrait, SoftDeletes;
