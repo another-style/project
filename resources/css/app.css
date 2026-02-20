@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 /* Markdown content styles */
+.markdown-content {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
 .markdown-content p {
     @apply mb-2 last:mb-0;
 }
