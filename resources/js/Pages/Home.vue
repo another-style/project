@@ -122,7 +122,7 @@ const formatDate = (dateString) => {
                         <span class="font-medium text-gray-900">{{ topic.name || 'Аноним' }}</span>
                         <time>{{ formatDate(topic.created_at) }}</time>
                     </div>
-                    <p class="mt-2 text-sm text-gray-800 line-clamp-3">{{ topic.message }}</p>
+                    <div class="markdown-content mt-2 text-sm text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
                     <!-- Теги темы -->
                     <div v-if="topic.tags && topic.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
                         <Link

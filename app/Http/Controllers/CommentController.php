@@ -54,6 +54,7 @@ class CommentController extends Controller
         $userVotes = $this->getUserVotes($topicIds, $request->ip());
 
         $topics->getCollection()->transform(function ($topic) use ($lastComments, $userVotes) {
+            $topic->message_html = $topic->message_html;
             $topic->user_vote = $userVotes->get($topic->id);
             $topic->last_comment_link = null;
             if ($topic->last_comment_id && $lastComments->has($topic->last_comment_id)) {
