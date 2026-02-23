@@ -120,7 +120,7 @@ const formatDate = (dateString) => {
                 >
                     <Link
                         :href="route('comments.show', topic.id)"
-                        class="block p-4 pb-2"
+                        class="block p-4 pb-3"
                     >
                         <div class="flex items-center justify-between text-sm text-gray-500">
                             <div class="flex items-center gap-2">

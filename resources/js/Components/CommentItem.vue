@@ -100,11 +100,9 @@ const formatDate = (dateString) => {
             </div>
         </div>
 
-        <ImageGallery
-            v-if="comment.images && comment.images.length > 0"
-            :images="comment.images"
-            class="mt-2"
-        />
+        <div v-if="comment.images && comment.images.length > 0" class="mt-3">
+            <ImageGallery :images="comment.images" />
+        </div>
 
         <div ref="messageEl" class="markdown-content mt-4 text-base text-gray-800" v-html="comment.message_html"></div>
 
