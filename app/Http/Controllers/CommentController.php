@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Models\CommentVote;
 use App\Models\Tag;
+use App\Services\CommentImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class CommentController extends Controller
     public function index(Request $request): Response
     {
         $query = Comment::roots()
-            ->with('tags');
+            ->with(['tags', 'images']);
 
         // Фильтрация по тегу
         $currentTag = $request->query('tag');
@@ -96,7 +97,10 @@ class CommentController extends Controller
     {
         $descendants = $comment->descendants()
             ->defaultOrder()
+            ->with('images')
             ->get();
+
+        $comment->load('images');
 
         $ip = $request->ip();
         $allCommentIds = $descendants->pluck('id')->push($comment->id);
@@ -112,6 +116,7 @@ class CommentController extends Controller
                     'likes_count' => $comment->likes_count,
                     'dislikes_count' => $comment->dislikes_count,
                     'user_vote' => $userVotes->get($comment->id),
+                    'images' => $comment->images->map(fn ($img) => ['url' => $img->url])->all(),
                 ]
             ),
             'children' => $tree,
@@ -121,7 +126,7 @@ class CommentController extends Controller
     /**
      * Создание нового комментария (тема или ответ).
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, CommentImageService $imageService): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['nullable', 'string', 'max:50'],
@@ -129,6 +134,8 @@ class CommentController extends Controller
             'parent_id' => ['nullable', 'integer', 'exists:comments,id'],
             'tags' => ['nullable', 'array', 'max:5'],
             'tags.*' => ['string', 'max:50'],
+            'images' => ['nullable', 'array', 'max:5'],
+            'images.*' => ['image', 'mimes:jpeg,jpg,png,webp', 'max:10240'],
         ]);
 
         $comment = Comment::create([
@@ -143,6 +150,14 @@ class CommentController extends Controller
             $tagIds = collect($validated['tags'])
                 ->map(fn ($name) => Tag::firstOrCreate(['name' => trim($name)])->id);
             $comment->tags()->sync($tagIds);
+        }
+
+        // Изображения — до 5 штук, проверены PHP-функцией getimagesize() через правило image
+        if (! empty($validated['images'])) {
+            foreach ($validated['images'] as $imageFile) {
+                $image = $imageService->store($imageFile);
+                $comment->images()->attach($image->id);
+            }
         }
 
         if ($comment->parent_id) {
@@ -161,6 +176,7 @@ class CommentController extends Controller
     {
         $descendants = $comment->descendants()
             ->defaultOrder()
+            ->with('images')
             ->get();
 
         $ip = $request->ip();
@@ -258,6 +274,7 @@ class CommentController extends Controller
                         'likes_count' => $child->likes_count,
                         'dislikes_count' => $child->dislikes_count,
                         'user_vote' => $userVotes?->get($child->id),
+                        'images' => $child->images->map(fn ($img) => ['url' => $img->url])->all(),
                         'children' => [],
                         'has_more_replies' => $hasReplies,
                     ];
@@ -275,6 +292,7 @@ class CommentController extends Controller
                     'likes_count' => $child->likes_count,
                     'dislikes_count' => $child->dislikes_count,
                     'user_vote' => $userVotes?->get($child->id),
+                    'images' => $child->images->map(fn ($img) => ['url' => $img->url])->all(),
                     'children' => $buildLevel($child->id, $currentDepth + 1),
                     'has_more_replies' => false,
                 ];

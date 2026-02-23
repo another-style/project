@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import CommentForm from '@/Components/CommentForm.vue';
+import ImageGallery from '@/Components/ImageGallery.vue';
 
 const props = defineProps({
     comment: {
@@ -100,6 +101,12 @@ const formatDate = (dateString) => {
         </div>
 
         <div ref="messageEl" class="markdown-content mt-2 text-sm text-gray-800" v-html="comment.message_html"></div>
+
+        <ImageGallery
+            v-if="comment.images && comment.images.length > 0"
+            :images="comment.images"
+            class="mt-2"
+        />
 
         <div class="mt-3 flex items-center gap-4">
             <button

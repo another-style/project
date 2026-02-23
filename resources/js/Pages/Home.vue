@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import CommentForm from '@/Components/CommentForm.vue';
+import ImageGallery from '@/Components/ImageGallery.vue';
 
 const props = defineProps({
     topics: Object,
@@ -112,69 +113,79 @@ const formatDate = (dateString) => {
                     Пока нет ни одной темы. Создайте первую!
                 </div>
 
-                <Link
+                <div
                     v-for="topic in topics.data"
                     :key="topic.id"
-                    :href="route('comments.show', topic.id)"
-                    class="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+                    class="rounded-lg bg-white shadow-sm transition hover:shadow-md"
                 >
-                    <div class="flex items-center justify-between text-sm text-gray-500">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-gray-900">{{ topic.name || 'Аноним' }}</span>
-                            <span v-if="topic.is_pinned" class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3 w-3">
-                                    <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
-                                    <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-                                </svg>
-                                Закреплено
-                            </span>
+                    <Link
+                        :href="route('comments.show', topic.id)"
+                        class="block p-4 pb-2"
+                    >
+                        <div class="flex items-center justify-between text-sm text-gray-500">
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium text-gray-900">{{ topic.name || 'Аноним' }}</span>
+                                <span v-if="topic.is_pinned" class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3 w-3">
+                                        <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+                                        <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+                                    </svg>
+                                    Закреплено
+                                </span>
+                            </div>
+                            <time>{{ formatDate(topic.created_at) }}</time>
                         </div>
-                        <time>{{ formatDate(topic.created_at) }}</time>
+                        <div class="markdown-content mt-2 text-sm text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
+                    </Link>
+
+                    <!-- Изображения — вне <Link>, чтобы клик не вёл на страницу темы -->
+                    <div v-if="topic.images && topic.images.length > 0" class="px-4 pb-2">
+                        <ImageGallery :images="topic.images" />
                     </div>
-                    <div class="markdown-content mt-2 text-sm text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
-                    <!-- Теги темы -->
-                    <div v-if="topic.tags && topic.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
+
+                    <div class="px-4 pb-3">
+                        <!-- Теги темы -->
+                        <div v-if="topic.tags && topic.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
+                            <Link
+                                v-for="tag in topic.tags"
+                                :key="tag.id"
+                                :href="'/?tag=' + encodeURIComponent(tag.name)"
+                                class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 hover:bg-indigo-200"
+                            >
+                                {{ tag.name }}
+                            </Link>
+                        </div>
+                        <div class="mt-2 flex items-center gap-4">
+                            <button
+                                @click.prevent="sendVote(topic.id, 1)"
+                                class="flex items-center gap-1 text-sm transition-colors"
+                                :class="getVote(topic).user_vote === 1 ? 'text-green-600' : 'text-gray-400 hover:text-green-600'"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                                    <path d="M1 8.998a1 1 0 0 1 1-1h3v9H2a1 1 0 0 1-1-1v-7Zm5.5 8.25 1.886-.943A11.985 11.985 0 0 0 12.5 11.06V3.5a1 1 0 0 0-1-1h-.33a1.75 1.75 0 0 0-1.634 1.127l-1.16 3.034A.25.25 0 0 1 8.142 6.8H6.5v10.448Z" />
+                                </svg>
+                                <span>{{ getVote(topic).likes_count }}</span>
+                            </button>
+                            <button
+                                @click.prevent="sendVote(topic.id, -1)"
+                                class="flex items-center gap-1 text-sm transition-colors"
+                                :class="getVote(topic).user_vote === -1 ? 'text-red-600' : 'text-gray-400 hover:text-red-600'"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                                    <path d="M19 11.002a1 1 0 0 1-1 1h-3v-9h2a1 1 0 0 1 1 1v7Zm-5.5-8.25-1.886.943A11.985 11.985 0 0 0 7.5 8.94v7.56a1 1 0 0 0 1 1h.33a1.75 1.75 0 0 0 1.634-1.127l1.16-3.034a.25.25 0 0 1 .234-.139H13.5V2.752Z" />
+                                </svg>
+                                <span>{{ getVote(topic).dislikes_count }}</span>
+                            </button>
+                        </div>
                         <Link
-                            v-for="tag in topic.tags"
-                            :key="tag.id"
-                            :href="'/?tag=' + encodeURIComponent(tag.name)"
-                            class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 hover:bg-indigo-200"
-                            @click.stop
+                            v-if="topic.last_comment_at && topic.last_comment_at !== topic.created_at"
+                            :href="topic.last_comment_link || (route('comments.show', topic.id) + '#comment-' + topic.last_comment_id)"
+                            class="mt-1 block text-xs text-indigo-500 hover:text-indigo-700"
                         >
-                            {{ tag.name }}
+                            Последний ответ: {{ formatDate(topic.last_comment_at) }}
                         </Link>
                     </div>
-                    <div class="mt-2 flex items-center gap-4" @click.stop>
-                        <button
-                            @click.prevent="sendVote(topic.id, 1)"
-                            class="flex items-center gap-1 text-sm transition-colors"
-                            :class="getVote(topic).user_vote === 1 ? 'text-green-600' : 'text-gray-400 hover:text-green-600'"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
-                                <path d="M1 8.998a1 1 0 0 1 1-1h3v9H2a1 1 0 0 1-1-1v-7Zm5.5 8.25 1.886-.943A11.985 11.985 0 0 0 12.5 11.06V3.5a1 1 0 0 0-1-1h-.33a1.75 1.75 0 0 0-1.634 1.127l-1.16 3.034A.25.25 0 0 1 8.142 6.8H6.5v10.448Z" />
-                            </svg>
-                            <span>{{ getVote(topic).likes_count }}</span>
-                        </button>
-                        <button
-                            @click.prevent="sendVote(topic.id, -1)"
-                            class="flex items-center gap-1 text-sm transition-colors"
-                            :class="getVote(topic).user_vote === -1 ? 'text-red-600' : 'text-gray-400 hover:text-red-600'"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
-                                <path d="M19 11.002a1 1 0 0 1-1 1h-3v-9h2a1 1 0 0 1 1 1v7Zm-5.5-8.25-1.886.943A11.985 11.985 0 0 0 7.5 8.94v7.56a1 1 0 0 0 1 1h.33a1.75 1.75 0 0 0 1.634-1.127l1.16-3.034a.25.25 0 0 1 .234-.139H13.5V2.752Z" />
-                            </svg>
-                            <span>{{ getVote(topic).dislikes_count }}</span>
-                        </button>
-                    </div>
-                    <Link
-                        v-if="topic.last_comment_at && topic.last_comment_at !== topic.created_at"
-                        :href="topic.last_comment_link || (route('comments.show', topic.id) + '#comment-' + topic.last_comment_id)"
-                        class="mt-1 block text-xs text-indigo-500 hover:text-indigo-700"
-                        @click.stop
-                    >
-                        Последний ответ: {{ formatDate(topic.last_comment_at) }}
-                    </Link>
-                </Link>
+                </div>
             </div>
 
             <div v-if="topics.last_page > 1" class="mt-6 flex justify-center gap-2">

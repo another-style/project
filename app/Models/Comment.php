@@ -31,6 +31,8 @@ use Kalnoy\Nestedset\NodeTrait;
  * @property-read int|null $children_count
  * @property-read mixed $message_html
  * @property-read Comment|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CommentImage> $images
+ * @property-read int|null $images_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
  * @property-read int|null $tags_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CommentVote> $votes
@@ -149,6 +151,11 @@ class Comment extends Model
     public function votes(): HasMany
     {
         return $this->hasMany(CommentVote::class);
+    }
+
+    public function images(): BelongsToMany
+    {
+        return $this->belongsToMany(CommentImage::class);
     }
 
     public function tags(): BelongsToMany

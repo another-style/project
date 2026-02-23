@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CommentResource\Pages;
+use App\Filament\Resources\CommentResource\RelationManagers\ImagesRelationManager;
 use App\Models\Comment;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -82,6 +83,10 @@ class CommentResource extends Resource
                 Tables\Columns\TextColumn::make('tags.name')
                     ->label('Теги')
                     ->badge(),
+                Tables\Columns\TextColumn::make('images_count')
+                    ->label('Фото')
+                    ->counts('images')
+                    ->sortable(),
                 Tables\Columns\IconColumn::make('is_pinned')
                     ->label('Закреплён')
                     ->boolean()
@@ -132,7 +137,7 @@ class CommentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ImagesRelationManager::class,
         ];
     }
 

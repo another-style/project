@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import { useMarkdownToolbar } from '@/Composables/useMarkdownToolbar.js';
@@ -30,10 +30,13 @@ const form = useForm({
     message: props.initialMessage,
     parent_id: props.parentId,
     tags: [],
+    images: [],
 });
 
 const textareaRef = ref(null);
+const fileInputRef = ref(null);
 const tagInput = ref('');
+const imagePreviews = ref([]);
 const { applyMarkdown } = useMarkdownToolbar();
 
 watch(() => props.initialMessage, (val) => {
@@ -59,12 +62,34 @@ const removeTag = (index) => {
     form.tags.splice(index, 1);
 };
 
+const handleImageFiles = (e) => {
+    const files = Array.from(e.target.files).slice(0, 5);
+    imagePreviews.value.forEach(url => URL.revokeObjectURL(url));
+    imagePreviews.value = files.map(f => URL.createObjectURL(f));
+    form.images = files;
+};
+
+const removeImage = (index) => {
+    URL.revokeObjectURL(imagePreviews.value[index]);
+    imagePreviews.value.splice(index, 1);
+    form.images = form.images.filter((_, i) => i !== index);
+    if (form.images.length === 0 && fileInputRef.value) {
+        fileInputRef.value.value = '';
+    }
+};
+
 const submit = () => {
     form.post(route('comments.store'), {
         preserveScroll: true,
         onSuccess: () => {
             form.reset('name', 'message', 'tags');
+            form.images = [];
+            imagePreviews.value.forEach(url => URL.revokeObjectURL(url));
+            imagePreviews.value = [];
             tagInput.value = '';
+            if (fileInputRef.value) {
+                fileInputRef.value.value = '';
+            }
             emit('submitted');
         },
     });
@@ -156,6 +181,40 @@ const submit = () => {
             </div>
             <p class="mt-1 text-xs text-gray-400">{{ form.tags.length }} / 5 тегов</p>
             <InputError :message="form.errors.tags" class="mt-1" />
+        </div>
+
+        <div>
+            <input
+                ref="fileInputRef"
+                type="file"
+                multiple
+                accept=".jpg,.jpeg,.png,.webp"
+                class="block w-full text-sm text-gray-500 file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+                :disabled="form.images.length >= 5"
+                @change="handleImageFiles"
+            />
+            <div v-if="imagePreviews.length > 0" class="mt-2 flex flex-wrap gap-2">
+                <div
+                    v-for="(preview, index) in imagePreviews"
+                    :key="index"
+                    class="relative"
+                >
+                    <img
+                        :src="preview"
+                        class="h-16 w-16 rounded object-cover border border-gray-200"
+                        alt=""
+                    />
+                    <button
+                        type="button"
+                        @click="removeImage(index)"
+                        class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-xs leading-none"
+                    >
+                        &times;
+                    </button>
+                </div>
+            </div>
+            <p class="mt-1 text-xs text-gray-400">Форматы: JPG, PNG, WebP. Не более 5 файлов (по 10 МБ).</p>
+            <InputError :message="form.errors.images" class="mt-1" />
         </div>
 
         <div class="flex justify-end">
