@@ -135,13 +135,16 @@ const formatDate = (dateString) => {
                             </div>
                             <time>{{ formatDate(topic.created_at) }}</time>
                         </div>
-                        <div class="markdown-content mt-2 text-sm text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
                     </Link>
 
                     <!-- Изображения — вне <Link>, чтобы клик не вёл на страницу темы -->
                     <div v-if="topic.images && topic.images.length > 0" class="px-4 pb-2">
                         <ImageGallery :images="topic.images" />
                     </div>
+
+                    <Link :href="route('comments.show', topic.id)" class="block px-4 pb-2">
+                        <div class="markdown-content text-sm text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
+                    </Link>
 
                     <div class="px-4 pb-3">
                         <!-- Теги темы -->
