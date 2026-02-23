@@ -88,19 +88,19 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\{Model}"
 ### Админ-панель (Filament)
 - Filament использует Livewire + Alpine.js, сосуществует с Inertia+Vue без конфликтов.
 - Ресурсы, страницы и виджеты размещаются в `app/Filament/`.
-- **Существующие ресурсы**: `UserResource`, `RoleResource`, `PermissionResource` (группа навигации «Доступ»), `CommentResource` (модерация комментариев с поддержкой soft delete).
+- **Существующие ресурсы**: `UserResource`, `TagResource`, `RoleResource`, `PermissionResource` (группа навигации «Доступ»), `CommentResource` (модерация комментариев с поддержкой soft delete, включая кастомное действие `togglePin` через permission `Comment.pin`).
 
 ### Роли и разрешения (spatie/laravel-permission)
 - Модель `User` использует трейт `HasRoles` и реализует интерфейс `FilamentUser`.
 - Доступ в админ-панель контролируется через permission `AdminPanel.access` в методе `\App\Models\User::canAccessPanel`.
-- **Формат permissions**: `Entity.action`, где `Entity` — название сущности (PascalCase), `action` — действие (lowercase). Примеры: `User.view`, `User.create`, `Role.update`, `Permission.delete`, `AdminPanel.access`.
+- **Формат permissions**: `Entity.action`, где `Entity` — название сущности (PascalCase), `action` — действие (lowercase). Примеры: `User.view`, `User.create`, `Role.update`, `Permission.delete`, `Comment.pin`, `CommentImage.delete`, `AdminPanel.access`.
 - При добавлении нового Filament-ресурса для сущности необходимо создать соответствующие permissions в отдельной миграции.
 
 ### Авторизация действий (Policy)
 - Policy-классы расположены в `app/Policies/` и используются Filament для авторизации CRUD-действий над ресурсами.
 - Для моделей из `App\Models` Laravel обнаруживает Policy автоматически (например, `UserPolicy` для `User`).
 - Для моделей spatie (`Spatie\Permission\Models\Role`, `Spatie\Permission\Models\Permission`) Policy регистрируются явно через `Gate::policy()` в `\App\Providers\AppServiceProvider::boot`.
-- **Существующие Policy**: `UserPolicy`, `CommentPolicy`, `RolePolicy`, `PermissionPolicy`.
+- **Существующие Policy**: `UserPolicy`, `CommentPolicy` (дополнительно содержит метод `pin` → `Comment.pin`), `TagPolicy`, `CommentImagePolicy` (только `viewAny`/`delete`/`deleteAny` → `CommentImage.delete`), `RolePolicy`, `PermissionPolicy`.
 - **Проверка активности пользователя**: каждый метод Policy обязательно проверяет `$user->isActive()` перед проверкой permissions. Заблокированный пользователь (`is_active = false`) не может выполнять никакие действия, даже если у него есть соответствующие permissions. Метод `\App\Models\User::isActive` возвращает значение поля `is_active`. Аналогично, `\App\Models\User::canAccessPanel` также проверяет активность пользователя перед предоставлением доступа к админ-панели.
 - Каждый Policy содержит стандартный набор методов, которые Filament вызывает автоматически:
 
@@ -114,6 +114,11 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\{Model}"
 | `deleteAny`    | Массовое удаление       | `Entity.delete`     |
 
 - **При добавлении нового Filament-ресурса** необходимо: (1) создать permissions в миграции, (2) создать Policy-класс с методами из таблицы выше (каждый метод должен проверять `$user->isActive()` перед проверкой permission), (3) если модель не из `App\Models` — зарегистрировать Policy в `AppServiceProvider`.
+
+### Сервисы (app/Services/)
+
+- **`MarkdownService`** — конвертирует Markdown в безопасный HTML через League\CommonMark (расширения CommonMark + Strikethrough). После конвертации стрипает теги, оставляя только разрешённые (`p`, `pre`, `ul`, `ol`, `li`, `blockquote`, `h1–h6`, `hr`, `br`, `strong`, `em`, `code`, `del`). Используется в аксессоре `\App\Models\Comment::messageHtml`.
+- **`CommentImageService`** — сохраняет загруженные изображения в `storage/app/public/comment-images/`. Имя файла = `md5(содержимого).расширение`, каталог — три вложенных уровня из первых символов имени файла (например, `d2d8f9c2.jpg` → `d/2/d/d2d8f9c2.jpg`). Повторный upload одного файла не создаёт дубликат (через `firstOrCreate`).
 
 ### Тестирование
 - PHPUnit с двумя наборами: `tests/Unit/` и `tests/Feature/`.
