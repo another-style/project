@@ -63,10 +63,13 @@ const removeTag = (index) => {
 };
 
 const handleImageFiles = (e) => {
-    const files = Array.from(e.target.files).slice(0, 5);
-    imagePreviews.value.forEach(url => URL.revokeObjectURL(url));
-    imagePreviews.value = files.map(f => URL.createObjectURL(f));
-    form.images = files;
+    const newFiles = Array.from(e.target.files);
+    const remaining = 5 - form.images.length;
+    const toAdd = newFiles.slice(0, remaining);
+    imagePreviews.value = [...imagePreviews.value, ...toAdd.map(f => URL.createObjectURL(f))];
+    form.images = [...form.images, ...toAdd];
+    // Сбрасываем input, чтобы повторный выбор тех же файлов снова срабатывал
+    e.target.value = '';
 };
 
 const removeImage = (index) => {
