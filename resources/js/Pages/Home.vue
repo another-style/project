@@ -64,7 +64,7 @@ const formatDate = (dateString) => {
     <Head title="Пример LLM-генерации" />
 
     <div class="min-h-screen bg-gray-100">
-        <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
             <h1 class="text-2xl font-bold text-gray-900">Пример LLM-генерации</h1>
             <p class="mt-2 text-sm text-gray-600">
                 Данный мини-сайт в качестве <u>эксперимента</u> был полностью написан системой Claude Code за утро и вечер одного дня. Человек не написал тут ни одной строчки кода, не выполнил ни одной bash-команды.
@@ -143,7 +143,7 @@ const formatDate = (dateString) => {
                     </div>
 
                     <Link :href="route('comments.show', topic.id)" class="block px-4 pb-2">
-                        <div class="markdown-content text-sm text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
+                        <div class="markdown-content text-base text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
                     </Link>
 
                     <div class="px-4 pb-3">

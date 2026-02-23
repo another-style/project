@@ -106,7 +106,7 @@ const formatDate = (dateString) => {
             class="mt-2"
         />
 
-        <div ref="messageEl" class="markdown-content mt-2 text-sm text-gray-800" v-html="comment.message_html"></div>
+        <div ref="messageEl" class="markdown-content mt-4 text-base text-gray-800" v-html="comment.message_html"></div>
 
         <div class="mt-3 flex items-center gap-4">
             <button
