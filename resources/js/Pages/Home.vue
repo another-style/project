@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import CommentForm from '@/Components/CommentForm.vue';
 import ImageGallery from '@/Components/ImageGallery.vue';
@@ -47,6 +47,28 @@ const sendVote = async (topicId, voteValue) => {
         votingStates.value[topicId] = false;
     }
 };
+
+const paginationLinks = computed(() => {
+    const links = props.topics.links;
+    if (!links || links.length < 3) return links ?? [];
+
+    const prev = links[0];
+    const next = links[links.length - 1];
+    const pageLinks = links.slice(1, -1);
+
+    const total = pageLinks.length;
+    if (total <= 5) return [prev, ...pageLinks, next];
+
+    const currentIndex = pageLinks.findIndex(link => link.active);
+    let start = Math.max(0, currentIndex - 2);
+    let end = start + 5;
+    if (end > total) {
+        end = total;
+        start = Math.max(0, end - 5);
+    }
+
+    return [prev, ...pageLinks.slice(start, end), next];
+});
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -192,7 +214,7 @@ const formatDate = (dateString) => {
             </div>
 
             <div v-if="topics.last_page > 1" class="mt-6 flex justify-center gap-2">
-                <template v-for="link in topics.links" :key="link.label">
+                <template v-for="link in paginationLinks" :key="link.label">
                     <Link
                         v-if="link.url"
                         :href="link.url"
