@@ -29,6 +29,8 @@ class MarkdownService
 
     public function toHtml(string $markdown): string
     {
+        $markdown = $this->disableLazyContinuation($markdown);
+
         $html = $this->converter->convert($markdown)->getContent();
 
         // Оставляем только безопасные теги
@@ -39,5 +41,35 @@ class MarkdownService
         ]);
 
         return trim($html);
+    }
+
+    /**
+     * CommonMark по спецификации допускает «lazy continuation»: строка без `>`
+     * сразу после цитаты считается её продолжением, а не новым абзацем.
+     * Чтобы такое поведение не удивляло пользователей, вставляем пустую строку
+     * между последней строкой цитаты и следующей непустой строкой без `>`.
+     */
+    private function disableLazyContinuation(string $markdown): string
+    {
+        $lines = explode("\n", $markdown);
+        $result = [];
+
+        foreach ($lines as $i => $line) {
+            $result[] = $line;
+
+            $isQuote = str_starts_with(ltrim($line), '>');
+
+            if ($isQuote && isset($lines[$i + 1])) {
+                $next = $lines[$i + 1];
+                $nextIsQuote = str_starts_with(ltrim($next), '>');
+                $nextIsBlank = trim($next) === '';
+
+                if (!$nextIsQuote && !$nextIsBlank) {
+                    $result[] = '';
+                }
+            }
+        }
+
+        return implode("\n", $result);
     }
 }
