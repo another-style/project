@@ -165,7 +165,7 @@ const formatDate = (dateString) => {
                     </div>
 
                     <Link :href="route('comments.show', topic.id)" class="block px-4 pb-2">
-                        <div class="markdown-content text-base text-gray-800 line-clamp-3" v-html="topic.message_html"></div>
+                        <div class="markdown-content text-base text-gray-800" :class="{ 'line-clamp-3': !topic.is_pinned }" v-html="topic.message_html"></div>
                     </Link>
 
                     <div class="px-4 pb-3">
