@@ -33,7 +33,7 @@ class CommentResource extends Resource
                 Forms\Components\Textarea::make('message')
                     ->label('Сообщение')
                     ->required()
-                    ->maxLength(5000)
+                    ->maxLength(100000)
                     ->rows(5),
                 Forms\Components\TextInput::make('ip_address')
                     ->label('IP-адрес')

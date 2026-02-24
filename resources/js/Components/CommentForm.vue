@@ -164,13 +164,13 @@ const submit = () => {
                 :placeholder="placeholder"
                 rows="4"
                 class="w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                maxlength="5000"
+                maxlength="10000"
                 required
             ></textarea>
             <InputError :message="form.errors.message" class="mt-1" />
         </div>
 
-        <span class="text-xs text-gray-600">{{ form.message.length }} / 5000</span>
+        <span class="text-xs text-gray-600">{{ form.message.length }} / 10000</span>
 
         <div v-if="showTags">
             <div v-if="form.tags.length > 0" class="mb-2 flex flex-wrap gap-1">

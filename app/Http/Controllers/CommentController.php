@@ -130,7 +130,7 @@ class CommentController extends Controller
     {
         $validated = $request->validate([
             'name' => ['nullable', 'string', 'max:50'],
-            'message' => ['required', 'string', 'max:5000'],
+            'message' => ['required', 'string', 'max:10000'],
             'parent_id' => ['nullable', 'integer', 'exists:comments,id'],
             'tags' => ['nullable', 'array', 'max:5'],
             'tags.*' => ['string', 'max:50'],
