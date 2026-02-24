@@ -37,6 +37,13 @@ class CommentPolicy
         return $user->isActive() && $user->hasPermissionTo('Comment.delete');
     }
 
+    public function viewIp(User $user): bool
+    {
+        return $user->isActive()
+            && $user->hasPermissionTo('Comment.view')
+            && $user->hasPermissionTo('Comment.viewIp');
+    }
+
     public function pin(User $user, Comment $comment): bool
     {
         return $user->isActive() && $user->hasPermissionTo('Comment.pin');

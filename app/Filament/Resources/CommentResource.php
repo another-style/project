@@ -37,7 +37,8 @@ class CommentResource extends Resource
                     ->rows(5),
                 Forms\Components\TextInput::make('ip_address')
                     ->label('IP-адрес')
-                    ->disabled(),
+                    ->disabled()
+                    ->visible(fn (): bool => auth()->user()->can('viewIp', Comment::class)),
                 Forms\Components\TextInput::make('parent_id')
                     ->label('ID родителя')
                     ->disabled(),
@@ -75,7 +76,8 @@ class CommentResource extends Resource
                     ->limit(100)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('ip_address')
-                    ->label('IP-адрес'),
+                    ->label('IP-адрес')
+                    ->visible(fn (): bool => auth()->user()->can('viewIp', Comment::class)),
                 Tables\Columns\TextColumn::make('parent_id')
                     ->label('Родитель')
                     ->default('Тема')
