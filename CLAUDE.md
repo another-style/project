@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 Этот файл содержит инструкции для Claude Code (claude.ai/code) при работе с кодом в этом репозитории.
 
 ## Общие принципы работы и взаимодействие с пользователем
@@ -15,7 +17,7 @@
 
 ## Обзор проекта
 
-Приложение на Laravel 12 с двойным фронтендом: Inertia.js + Vue 3 для публичных страниц, Filament 3 для админ-панели (`/admin`). Используется spatie/laravel-permission для ролей и прав доступа. Аутентификация реализована через Laravel Breeze.
+Анонимный форум на Laravel 12: пользователи публикуют темы и ответы без регистрации (поле `name` у комментария — необязательное). Двойной фронтенд: Inertia.js + Vue 3 для публичных страниц, Filament 3 для админ-панели (`/admin`). Используется spatie/laravel-permission для ролей и прав доступа. Аутентификация реализована через Laravel Breeze (только для доступа в админку).
 
 ## Docker-окружение
 
@@ -76,12 +78,21 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\{Model}"
 - **Контроллеры**: `app/Http/Controllers/` — стандартные контроллеры возвращают ответы через `Inertia::render()`.
 - **Middleware**: `HandleInertiaRequests` передаёт `auth.user` prop на все Inertia-страницы.
 - **Модели**: `app/Models/` — Eloquent-модели с трейтами spatie permission. Модель `Comment` использует `kalnoy/nestedset` (`NodeTrait`) для иерархической структуры комментариев и `SoftDeletes`.
+- **Rate limiting**: задан в `\App\Providers\AppServiceProvider::boot` — `comment-store`: 5 запросов/мин по IP; `comment-vote`: 30 запросов/мин по IP.
+
+### Структура комментариев
+- **Тема** — корневой комментарий (`parent_id = null`). Только у тем бывают теги.
+- **Ответ** — комментарий с `parent_id`.
+- **Глубина дерева**: `CommentController::MAX_DEPTH = 10`. Ответы глубже 10 уровней не рендерятся сразу — подгружаются через `GET /comments/{comment}/replies` (маршрут `comments.replies`).
+- **Денормализация**: поля `last_comment_at` и `last_comment_id` на корневом комментарии обновляются автоматически через `\App\Models\Comment::booted` (хук `created`). Используются для сортировки тем на главной странице.
+- Главная (`/`) отдаёт темы постранично (20 штук), отсортированные по `is_pinned DESC`, затем `last_comment_at DESC`.
 
 ### Фронтенд (Vue 3 + Inertia)
 - **Точка входа**: `resources/js/app.js`
 - **Страницы**: `resources/js/Pages/` — Vue SFC, соответствующие 1:1 маршрутам Inertia (например, `Dashboard.vue` отображается на `/dashboard`).
 - **Лейауты**: `resources/js/Layouts/` — `AuthenticatedLayout.vue`, `GuestLayout.vue`.
 - **Компоненты**: `resources/js/Components/` — переиспользуемые UI-компоненты (кнопки, поля ввода, модалки).
+- **Ключевые компоненты форума**: `CommentForm.vue` (форма создания темы/ответа), `CommentItem.vue` (отображение одного комментария с голосованием), `CommentTree.vue` (рекурсивный рендер дерева ответов), `ImageGallery.vue` (отображение вложенных изображений).
 - **Маршрутизация**: Ziggy предоставляет именованные Laravel-маршруты в JS через хелпер `route()`.
 - **Стили**: Tailwind CSS с плагином `@tailwindcss/forms`.
 
@@ -118,7 +129,7 @@ docker compose exec php php artisan ide-helper:models -W "\App\Models\{Model}"
 ### Сервисы (app/Services/)
 
 - **`MarkdownService`** — конвертирует Markdown в безопасный HTML через League\CommonMark (расширения CommonMark + Strikethrough). После конвертации стрипает теги, оставляя только разрешённые (`p`, `pre`, `ul`, `ol`, `li`, `blockquote`, `h1–h6`, `hr`, `br`, `strong`, `em`, `code`, `del`). Используется в аксессоре `\App\Models\Comment::messageHtml`.
-- **`CommentImageService`** — сохраняет загруженные изображения в `storage/app/public/comment-images/`. Имя файла = `md5(содержимого).расширение`, каталог — три вложенных уровня из первых символов имени файла (например, `d2d8f9c2.jpg` → `d/2/d/d2d8f9c2.jpg`). Повторный upload одного файла не создаёт дубликат (через `firstOrCreate`).
+- **`CommentImageService`** — сохраняет загруженные изображения в `storage/app/public/comment-images/`. Имя файла = `md5(содержимого).расширение`, каталог — три вложенных уровня из первых символов имени файла (например, `d2d8f9c2.jpg` → `d/2/d/d2d8f9c2.jpg`). Повторный upload одного файла не создаёт дубликат (через `firstOrCreate`). Удаление файла с диска — через `\App\Models\CommentImage::deleteWithFile`.
 
 ### Тестирование
 - PHPUnit с двумя наборами: `tests/Unit/` и `tests/Feature/`.
