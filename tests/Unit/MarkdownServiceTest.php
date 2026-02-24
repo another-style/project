@@ -457,6 +457,126 @@ class MarkdownServiceTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // Ссылки на комментарии (>>ID)
+    // -------------------------------------------------------------------------
+
+    public function test_comment_reference_renders_blockquote_with_link_when_comment_exists(): void
+    {
+        $service = new MarkdownService(fn (int $id) => $id === 123 ? '<p>Hello world</p>' : null);
+
+        $result = $service->toHtml('>>123');
+
+        $this->assertStringContainsString('<blockquote class="reply-quote">', $result);
+        $this->assertStringContainsString('<a href="/comments/123">&gt;&gt;123</a>', $result);
+        $this->assertStringContainsString('Hello world', $result);
+        // <p> должен быть убран, когда внутри только reply-quote
+        $this->assertStringNotContainsString('<p><blockquote', $result);
+    }
+
+    public function test_comment_reference_renders_plain_text_when_comment_does_not_exist(): void
+    {
+        $service = new MarkdownService(fn (int $id) => null);
+
+        $result = $service->toHtml('>>456');
+
+        $this->assertStringNotContainsString('<blockquote class="reply-quote"', $result);
+        $this->assertStringNotContainsString('<a', $result);
+        $this->assertStringContainsString('&gt;&gt;456', $result);
+    }
+
+    public function test_comment_reference_message_html_is_rendered(): void
+    {
+        // Резолвер возвращает уже отрендеренный HTML — он вставляется как есть
+        $service = new MarkdownService(fn (int $id) => '<p><strong>bold</strong> text</p>');
+
+        $result = $service->toHtml('>>10');
+
+        $this->assertStringContainsString('<strong>bold</strong>', $result);
+        $this->assertStringContainsString('<a href="/comments/10">&gt;&gt;10</a>', $result);
+    }
+
+    public function test_comment_reference_inside_code_span_is_not_transformed(): void
+    {
+        $service = new MarkdownService(fn (int $id) => '<p>some text</p>');
+
+        $result = $service->toHtml('`>>123`');
+
+        $this->assertStringNotContainsString('<blockquote', $result);
+        $this->assertStringContainsString('<code>', $result);
+    }
+
+    public function test_comment_reference_inside_fenced_code_block_is_not_transformed(): void
+    {
+        $service = new MarkdownService(fn (int $id) => '<p>some text</p>');
+
+        $result = $service->toHtml("```\n>>123\n```");
+
+        $this->assertStringNotContainsString('<blockquote class="reply-quote"', $result);
+        $this->assertStringContainsString('<pre>', $result);
+    }
+
+    public function test_comment_reference_without_digits_is_not_transformed(): void
+    {
+        // ">>" без цифр не должен срабатывать
+        $result = $this->service->toHtml('>> plain text');
+
+        $this->assertStringNotContainsString('reply-quote', $result);
+    }
+
+    public function test_multiple_comment_references_in_one_text(): void
+    {
+        $service = new MarkdownService(fn (int $id) => match ($id) {
+            1 => '<p>first</p>',
+            2 => '<p>second</p>',
+            default => null,
+        });
+
+        $result = $service->toHtml('text >>1 and >>2 and >>3 end');
+
+        // >>1 и >>2 существуют — рендерятся как ссылки
+        $this->assertStringContainsString('<a href="/comments/1">', $result);
+        $this->assertStringContainsString('<a href="/comments/2">', $result);
+        // >>3 не существует — простой текст
+        $this->assertStringNotContainsString('/comments/3', $result);
+        $this->assertStringContainsString('&gt;&gt;3', $result);
+    }
+
+    public function test_comment_reference_p_wrapper_removed_when_only_reply_quote(): void
+    {
+        $service = new MarkdownService(fn (int $id) => '<p>msg</p>');
+
+        // >>ID на отдельной строке — обёртка <p>...</p> вокруг blockquote убирается
+        $result = $service->toHtml('>>1');
+
+        $this->assertStringNotContainsString('<p><blockquote', $result);
+        $this->assertStringContainsString('<blockquote class="reply-quote">', $result);
+    }
+
+    public function test_comment_reference_p_wrapper_kept_when_mixed_with_text(): void
+    {
+        $service = new MarkdownService(fn (int $id) => '<p>msg</p>');
+
+        // >>ID внутри текста — <p> параграфа должен сохраниться
+        $result = $service->toHtml('some text >>1 more');
+
+        $this->assertStringContainsString('<p>', $result);
+    }
+
+    public function test_comment_reference_resolver_receives_correct_id(): void
+    {
+        $receivedId = null;
+        $service = new MarkdownService(function (int $id) use (&$receivedId): ?string {
+            $receivedId = $id;
+
+            return '<p>text</p>';
+        });
+
+        $service->toHtml('>>789');
+
+        $this->assertSame(789, $receivedId);
+    }
+
+    // -------------------------------------------------------------------------
     // Граничные случаи
     // -------------------------------------------------------------------------
 

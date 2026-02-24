@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import { useMarkdownToolbar } from '@/Composables/useMarkdownToolbar.js';
@@ -80,6 +80,24 @@ const removeImage = (index) => {
         fileInputRef.value.value = '';
     }
 };
+
+const insertReference = (id) => {
+    const text = `>>${id}\n\n`;
+    const textarea = textareaRef.value;
+    if (!textarea) {
+        form.message = text + form.message;
+        return;
+    }
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    form.message = form.message.slice(0, start) + text + form.message.slice(end);
+    nextTick(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + text.length;
+        textarea.focus();
+    });
+};
+
+defineExpose({ insertReference });
 
 const submit = () => {
     form.post(route('comments.store'), {

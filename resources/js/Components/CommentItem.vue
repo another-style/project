@@ -18,6 +18,7 @@ const dislikesCount = ref(props.comment.dislikes_count ?? 0);
 const userVote = ref(props.comment.user_vote ?? null);
 const voting = ref(false);
 const messageEl = ref(null);
+const commentFormRef = ref(null);
 
 const toggleReplyForm = () => {
     if (showReplyForm.value) {
@@ -43,6 +44,15 @@ const toggleReplyForm = () => {
     }
 
     showReplyForm.value = true;
+};
+
+const addReference = () => {
+    if (!showReplyForm.value) {
+        initialMessage.value = `>>${props.comment.id}\n\n`;
+        showReplyForm.value = true;
+    } else {
+        commentFormRef.value?.insertReference(props.comment.id);
+    }
 };
 
 const sendVote = async (voteValue) => {
@@ -137,12 +147,21 @@ const formatDate = (dateString) => {
             >
                 {{ showReplyForm ? 'Отмена' : 'Ответить' }}
             </button>
+        </div>
 
+        <div class="mt-3 flex items-center gap-4">
+            <button
+                @click="addReference"
+                class="text-xs text-indigo-500 hover:text-indigo-700"
+            >
+                Сослаться на этот комментарий
+            </button>
             <span v-if="!showReplyForm" class="text-xs text-gray-400">Выделите текст и нажмите «Ответить», чтобы процитировать</span>
         </div>
 
         <div v-if="showReplyForm" class="mt-3">
             <CommentForm
+                ref="commentFormRef"
                 :parent-id="comment.id"
                 :initial-message="initialMessage"
                 placeholder="Написать ответ..."
