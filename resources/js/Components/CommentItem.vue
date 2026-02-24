@@ -114,7 +114,7 @@ const formatDate = (dateString) => {
             <ImageGallery :images="comment.images" />
         </div>
 
-        <div ref="messageEl" class="markdown-content mt-4 text-base text-gray-800" v-html="comment.message_html"></div>
+        <div ref="messageEl" class="markdown-content mt-4 text-base text-black" v-html="comment.message_html"></div>
 
         <div class="mt-3 flex items-center gap-4">
             <button

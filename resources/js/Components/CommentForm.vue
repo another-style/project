@@ -124,7 +124,7 @@ const submit = () => {
                 v-model="form.name"
                 type="text"
                 placeholder="Имя (необязательно)"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                class="w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 maxlength="50"
             />
             <InputError :message="form.errors.name" class="mt-1" />
@@ -163,14 +163,14 @@ const submit = () => {
                 v-model="form.message"
                 :placeholder="placeholder"
                 rows="4"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                class="w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 maxlength="5000"
                 required
             ></textarea>
             <InputError :message="form.errors.message" class="mt-1" />
         </div>
 
-        <span class="text-xs text-gray-400">{{ form.message.length }} / 5000</span>
+        <span class="text-xs text-gray-600">{{ form.message.length }} / 5000</span>
 
         <div v-if="showTags">
             <div v-if="form.tags.length > 0" class="mb-2 flex flex-wrap gap-1">
@@ -194,13 +194,13 @@ const submit = () => {
                     v-model="tagInput"
                     type="text"
                     placeholder="Добавить тег (Enter)"
-                    class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="flex-1 rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                     maxlength="50"
                     :disabled="form.tags.length >= 5"
                     @keydown.enter.prevent="addTag"
                 />
             </div>
-            <p class="mt-1 text-xs text-gray-400">{{ form.tags.length }} / 5 тегов</p>
+            <p class="mt-1 text-xs text-gray-600">{{ form.tags.length }} / 5 тегов</p>
             <InputError :message="form.errors.tags" class="mt-1" />
         </div>
 
@@ -234,7 +234,7 @@ const submit = () => {
                     </button>
                 </div>
             </div>
-            <p class="mt-1 text-xs text-gray-400">Форматы: JPG, PNG, WebP. Не более 5 файлов (по 10 МБ).</p>
+            <p class="mt-1 text-xs text-gray-600">Форматы: JPG, PNG, WebP. Не более 5 файлов (по 10 МБ).</p>
             <InputError :message="form.errors.images" class="mt-1" />
         </div>
 
