@@ -73,7 +73,7 @@ DB_ROOT_PASSWORD=сложный_пароль_root
 REDIS_PASSWORD=сложный_пароль_для_redis
 
 SESSION_ENCRYPT=true
-SESSION_SECURE_COOKIE=true
+SESSION_SECURE_COOKIE=true   # false, если деплой без HTTPS (по IP)
 
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.твой-провайдер.ru
@@ -153,6 +153,9 @@ docker compose -f docker-compose.prod.yml exec php php artisan migrate --force
 # Заполнить базу начальными данными (роли, permissions, администратор)
 docker compose -f docker-compose.prod.yml exec php php artisan db:seed --force
 
+# Создать символическую ссылку storage/app/public → public/storage
+docker compose -f docker-compose.prod.yml exec php php artisan storage:link
+
 # Кэшировать конфигурацию для производительности
 docker compose -f docker-compose.prod.yml exec php php artisan config:cache
 docker compose -f docker-compose.prod.yml exec php php artisan route:cache
@@ -199,6 +202,27 @@ npm install && npm run build
 # (выполнить на локальной машине)
 # npm run build
 # scp -r public/build/ user@сервер:/var/www/project/public/build/
+```
+
+## Восстановление данных с предыдущего сервера
+
+### Дамп базы данных
+
+Скопировать файл дампа на сервер (например, через WinSCP), затем:
+
+```bash
+docker compose -f docker-compose.prod.yml exec -T mysql \
+  sh -c 'mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE"' < dump.sql
+```
+
+### Файлы пользователей (загруженные изображения)
+
+Скопировать содержимое `storage/app/public/` с предыдущего сервера в `/var/www/project/storage/app/public/` (например, через WinSCP).
+
+Убедиться, что права установлены корректно:
+
+```bash
+docker compose -f docker-compose.prod.yml exec php chmod -R 775 storage/app/public
 ```
 
 ## SSL-сертификат (HTTPS)
@@ -276,8 +300,8 @@ crontab -e
 - [ ] `APP_DEBUG=false`
 - [ ] Сложные пароли для MySQL и Redis
 - [ ] Порты MySQL и Redis не проброшены наружу
-- [ ] SSL-сертификат настроен
-- [ ] `SESSION_SECURE_COOKIE=true`
+- [ ] SSL-сертификат настроен (или `SESSION_SECURE_COOKIE=false` при деплое без HTTPS)
+- [ ] `SESSION_SECURE_COOKIE` соответствует наличию HTTPS
 - [ ] `SESSION_ENCRYPT=true`
 - [ ] Фронтенд-ассеты собраны (`npm run build`)
 - [ ] Composer-зависимости без dev (`--no-dev`)
